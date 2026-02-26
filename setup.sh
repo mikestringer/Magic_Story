@@ -1,3 +1,9 @@
+#how to use
+#cd ~
+#curl -fsSL "https://raw.githubusercontent.com/mikestringer/Magic_Story/main/setup.sh?$(date +%s)" -o setup.sh
+#chmod +x setup.sh
+#./setup.sh
+
 #!/usr/bin/env bash
 set -euo pipefail
 
