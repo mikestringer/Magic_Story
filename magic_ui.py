@@ -91,9 +91,9 @@ IMAGES_PATH = BASE_PATH + "images/"
 FONTS_PATH = BASE_PATH + "fonts/"
 
 # Font Path & Size
-TITLE_FONT = (None, 48)
+TITLE_FONT = (None, 64)
 TITLE_COLOR = (0, 0, 0)
-TEXT_FONT = (None, 24)
+TEXT_FONT = (None, 34)
 TEXT_COLOR = (0, 0, 0)
 
 # Delays Settings
@@ -503,9 +503,14 @@ class Book:
     def _display_surface(self, surface, x=0, y=0, target_surface=None):
         buffer = self._create_transparent_buffer((self.width, self.height))
         buffer.blit(surface, (x, y))
+    
         if target_surface is None:
-            buffer = pygame.transform.rotate(buffer, self.rotation)
-            self.screen.blit(buffer, (0, 0))
+            rotated = pygame.transform.rotate(buffer, self.rotation)
+    
+            # ✅ Center the rotated surface on the physical screen
+            screen_w, screen_h = self.screen.get_size()
+            rect = rotated.get_rect(center=(screen_w // 2, screen_h // 2))
+            self.screen.blit(rotated, rect.topleft)
         else:
             target_surface.blit(buffer, (0, 0))
 
@@ -650,8 +655,18 @@ class Book:
     def display_message(self, message):
         self._busy = True
         self._display_surface(self.images["background"], 0, 0)
-        height = self._title_text_height(message)
-        self._display_title_text(message, self.height // 2 - height // 2)
+    
+        lines = self._wrap_text(message, self.fonts["title"], self.textarea.width)
+        total_h = sum(self.fonts["title"].size(line)[1] for line in lines)
+        y = (self.height // 2) - (total_h // 2)
+    
+        for line in lines:
+            rendered = self.fonts["title"].render(line.strip(), True, TITLE_COLOR)
+            x = self.textarea.width // 2 - rendered.get_width() // 2
+            self._display_surface(rendered, x + self.textarea.x, y + self.textarea.y)
+            y += rendered.get_height()
+    
+        pygame.display.update()
         self._busy = False
 
     def load_story(self, story):
