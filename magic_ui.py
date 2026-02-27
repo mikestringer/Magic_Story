@@ -704,8 +704,12 @@ class Book:
 
         def show_listening():
             time.sleep(ALSA_ERROR_DELAY)
-            self.pixels.fill(NEOPIXEL_WAITING_COLOR)
-            self.pixels.show()
+            if self.pixels is not None:
+                try:
+                    self.pixels.fill(NEOPIXEL_WAITING_COLOR)
+                    self.pixels.show()
+             except Exception:
+                 pass
 
         self.listener.listen(ready_callback=show_listening)
 
