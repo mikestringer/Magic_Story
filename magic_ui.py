@@ -277,13 +277,15 @@ class Book:
         self.cursor = {"x": 0, "y": 0}
         self.listener = None
         self.backlight = SafeBacklight()
-        self.pixels = neopixel.NeoPixel(
-            NEOPIXEL_PIN,
-            NEOPIXEL_COUNT,
-            brightness=NEOPIXEL_BRIGHTNESS,
-            pixel_order=NEOPIXEL_ORDER,
-            auto_write=False,
-        )
+        self.pixels = None
+        if ENABLE_NEOPIXEL:
+            self.pixels = neopixel.NeoPixel(
+                NEOPIXEL_PIN,
+                NEOPIXEL_COUNT,
+                brightness=NEOPIXEL_BRIGHTNESS,
+                pixel_order=NEOPIXEL_ORDER,
+                auto_write=False,
+            )
         self._prompt = ""
         self.ollama = OllamaClient(OLLAMA_BASE_URL, OLLAMA_MODEL)
 
@@ -408,21 +410,33 @@ class Book:
             time.sleep(self.sleep_check_delay)
 
     def _handle_loading_status(self):
+        # If NeoPixel is not usable (not root / disabled), do nothing safely
+        if self.pixels is None:
+            while self._running:
+                time.sleep(0.2)
+            return
+    
         pulse = Pulse(
             self.pixels,
             speed=NEOPIXEL_PULSE_SPEED,
             color=NEOPIXEL_LOADING_COLOR,
             period=3,
         )
-
+    
         while self._running:
             if self._loading:
-                pulse.animate()
+                try:
+                    pulse.animate()
+                except Exception:
+                    pass
                 time.sleep(0.1)
-
-        self.pixels.fill(0)
-        self.pixels.show()
-
+    
+        try:
+            self.pixels.fill(0)
+            self.pixels.show()
+        except Exception:
+            pass
+            
     def _set_status_color(self, status_color):
         if status_color not in [
             NEOPIXEL_READING_COLOR,
@@ -435,8 +449,12 @@ class Book:
         self._loading = status_color == NEOPIXEL_LOADING_COLOR
 
         if status_color != NEOPIXEL_LOADING_COLOR:
-            self.pixels.fill(status_color)
-            self.pixels.show()
+            if self.pixels is not None:
+                try:
+                    self.pixels.fill(status_color)
+                    self.pixels.show()
+                except Exception:
+                    pass
 
     def handle_events(self):
         if not self._sleeping:
