@@ -18,10 +18,32 @@ import digitalio
 import neopixel
 import pygame
 import requests
-from rpi_backlight import Backlight
+#from rpi_backlight import Backlight
 from adafruit_led_animation.animation.pulse import Pulse
 
 from listener import Listener
+
+class SafeBacklight:
+    """Backlight wrapper that becomes a no-op if rpi_backlight isn't supported."""
+    def __init__(self):
+        try:
+            from rpi_backlight import Backlight as _Backlight
+            self._bl = _Backlight()
+        except Exception as e:
+            print(f"Backlight not available; continuing without it. ({e})")
+            self._bl = None
+
+    @property
+    def power(self):
+        if self._bl is None:
+            return True
+        return self._bl.power
+
+    @power.setter
+    def power(self, value: bool):
+        if self._bl is None:
+            return
+        self._bl.power = value
 
 # Base Path is the folder the script resides in
 BASE_PATH = os.path.dirname(sys.argv[0])
@@ -254,7 +276,7 @@ class Book:
         self._closing_times = deque(maxlen=QUIT_CLOSES)
         self.cursor = {"x": 0, "y": 0}
         self.listener = None
-        self.backlight = Backlight()
+        self.backlight = SafeBacklight()
         self.pixels = neopixel.NeoPixel(
             NEOPIXEL_PIN,
             NEOPIXEL_COUNT,
