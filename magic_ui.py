@@ -718,7 +718,9 @@ class Book:
             return
 
         def show_listening():
-            time.sleep(ALSA_ERROR_DELAY)
+            #time.sleep(ALSA_ERROR_DELAY)
+            self.display_message("I am listening... Please speak now!")
+            # Optional NeoPixel cue (if enabled)
             if self.pixels is not None:
                 try:
                     self.pixels.fill(NEOPIXEL_WAITING_COLOR)
