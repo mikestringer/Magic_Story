@@ -711,15 +711,20 @@ class Book:
     def generate_new_story(self):
         self._busy = True
         self.display_message("Please tell me the story you wish to read.")
-
+    
         if self._sleep_request:
             self._busy = False
             time.sleep(0.2)
             return
-
+    
+        # Thread-safe signal from the listener thread to the UI thread
+        listening_started = threading.Event()
+    
         def show_listening():
-            #time.sleep(ALSA_ERROR_DELAY)
-            self.display_message("I am listening... Please speak now!")
+            # IMPORTANT: This callback runs in the listener thread.
+            # Do NOT call pygame / display functions here.
+            listening_started.set()
+    
             # Optional NeoPixel cue (if enabled)
             if self.pixels is not None:
                 try:
@@ -727,46 +732,63 @@ class Book:
                     self.pixels.show()
                 except Exception:
                     pass
-
+    
+        # Start listening
         self.listener.listen(ready_callback=show_listening)
-        # wait up to RECORD_TIMEOUT + a little buffer for the listener thread
+    
+        # Show a clear on-screen cue from the MAIN thread as soon as we know listening started.
+        # Even if the callback doesn't fire quickly, show it anyway after a short timeout.
+        listening_started.wait(timeout=1.0)
+        if not self._sleep_request:
+            self.display_message("Listening... Speak now!")
+    
+        # Wait up to RECORD_TIMEOUT + a little buffer for the listener thread to finish
         deadline = time.monotonic() + (RECORD_TIMEOUT + 2)
         while self.listener.is_listening() and time.monotonic() < deadline:
+            if self._sleep_request:
+                self._busy = False
+                return
             time.sleep(0.05)
-
+    
         if self._sleep_request:
             self._busy = False
             return
-
+    
         # If listener didn't finish in time, stop it and bail
         if self.listener.is_listening():
             self.listener.stop_listening()
             print("Listener timed out.")
+            self._busy = False
             return
-
+    
         # Listener finished; grab the text (may be empty)
         story_request = (self.listener.recognize() or "").strip()
         if not story_request:
             print("No response from user.")
+            self._busy = False
             return
-
+    
         print(f"Heard: {story_request}")
-
+    
         story_prompt = self._make_story_prompt(story_request)
         self.display_loading()
-
+    
         response = self._sendchat(story_prompt)
         if self._sleep_request:
             self._busy = False
             return
+    
+        if not response:
+            self._busy = False
+            return
+    
         print(response)
-
-        self._busy = True
+    
         self.stories.append(response)
         self.story = len(self.stories) - 1
         self.page = 0
         self._busy = False
-
+    
         self.load_story(response)
 
     def _sleep(self):
