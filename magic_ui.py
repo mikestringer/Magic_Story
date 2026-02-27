@@ -529,9 +529,9 @@ class Book:
         buffer.blit(surface, (x, y))
     
         if target_surface is None:
-            rotated = pygame.transform.rotate(buffer, self.rotation)
-    
-            # ✅ Center the rotated surface on the physical screen
+           # rotated = pygame.transform.rotate(buffer, self.rotation)
+           rotated = buffer
+           # ✅ Center the rotated surface on the physical screen
             screen_w, screen_h = self.screen.get_size()
             rect = rotated.get_rect(center=(screen_w // 2, screen_h // 2))
             self.screen.blit(rotated, rect.topleft)
