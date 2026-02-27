@@ -532,9 +532,9 @@ class Book:
            # rotated = pygame.transform.rotate(buffer, self.rotation)
            rotated = buffer
            # ✅ Center the rotated surface on the physical screen
-            screen_w, screen_h = self.screen.get_size()
-            rect = rotated.get_rect(center=(screen_w // 2, screen_h // 2))
-            self.screen.blit(rotated, rect.topleft)
+           screen_w, screen_h = self.screen.get_size()
+           rect = rotated.get_rect(center=(screen_w // 2, screen_h // 2))
+           self.screen.blit(rotated, rect.topleft)
         else:
             self.screen.fill((255, 255, 255))
             target_surface.blit(buffer, (0, 0))
