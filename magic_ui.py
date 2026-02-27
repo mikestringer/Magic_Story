@@ -712,16 +712,27 @@ class Book:
                     pass
 
         self.listener.listen(ready_callback=show_listening)
+        # wait up to RECORD_TIMEOUT + a little buffer for the listener thread
+        deadline = time.monotonic() + (RECORD_TIMEOUT + 2)
+        while self.listener.is_listening() and time.monotonic() < deadline:
+            time.sleep(0.05)
 
         if self._sleep_request:
             self._busy = False
             return
 
-        if not self.listener.speech_waiting():
+        # If listener didn't finish in time, stop it and bail
+        if self.listener.is_listening():
+            self.listener.stop_listening()
+            print("Listener timed out.")
+            return
+
+        # Listener finished; grab the text (may be empty)
+        story_request = (self.listener.recognize() or "").strip()
+        if not story_request:
             print("No response from user.")
             return
 
-        story_request = self.listener.recognize()
         print(f"Heard: {story_request}")
 
         story_prompt = self._make_story_prompt(story_request)
