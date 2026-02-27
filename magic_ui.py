@@ -708,8 +708,8 @@ class Book:
                 try:
                     self.pixels.fill(NEOPIXEL_WAITING_COLOR)
                     self.pixels.show()
-             except Exception:
-                 pass
+                except Exception:
+                    pass
 
         self.listener.listen(ready_callback=show_listening)
 
