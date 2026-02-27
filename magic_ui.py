@@ -90,9 +90,9 @@ IMAGES_PATH = BASE_PATH + "images/"
 FONTS_PATH = BASE_PATH + "fonts/"
 
 # Font Path & Size
-TITLE_FONT = (FONTS_PATH + "Desdemona Black Regular.otf", 48)
+TITLE_FONT = (FONTS_PATH + None, 48)
 TITLE_COLOR = (0, 0, 0)
-TEXT_FONT = (FONTS_PATH + "times new roman.ttf", 24)
+TEXT_FONT = (FONTS_PATH + None, 24)
 TEXT_COLOR = (0, 0, 0)
 
 # Delays Settings
@@ -478,8 +478,9 @@ class Book:
         self.buttons[name] = Button(x, y, image, action, display_surface)
 
     def _load_font(self, name, details):
-        self.fonts[name] = pygame.font.Font(details[0], details[1])
-
+        font_path, font_size = details
+        self.fonts[name] = pygame.font.Font(font_path, font_size)  # font_path can be None
+    
     def _display_surface(self, surface, x=0, y=0, target_surface=None):
         buffer = self._create_transparent_buffer((self.width, self.height))
         buffer.blit(surface, (x, y))
