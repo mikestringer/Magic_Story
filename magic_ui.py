@@ -53,7 +53,7 @@ if BASE_PATH != "":
 # ----------------------------
 # General Settings
 # ----------------------------
-STORY_WORD_LENGTH = 800
+STORY_WORD_LENGTH = 150
 
 # Reed switch (disabled for now)
 ENABLE_REED_SWITCH = False
