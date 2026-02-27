@@ -695,7 +695,7 @@ class Book:
 
     def generate_new_story(self):
         self._busy = True
-        self.display_message("Speak aloud the story you wish to read.")
+        self.display_message("Please tell me the story you wish to read.")
 
         if self._sleep_request:
             self._busy = False
