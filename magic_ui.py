@@ -392,28 +392,27 @@ class Book:
         self._set_status_color(NEOPIXEL_READING_COLOR)
 
     def _scale_and_center(self, image: pygame.Surface) -> pygame.Surface:
-        """Scale image to fit inside portrait canvas without distortion and center it."""
+        """Scale image to cover the screen (no side bars), center-crop overflow."""
         if self.width <= 0 or self.height <= 0:
             return image
     
         img_w, img_h = image.get_size()
         screen_w, screen_h = self.width, self.height
+        if img_w <= 0 or img_h <= 0:
+            return image
     
-        # preserve aspect ratio
-        scale = min(screen_w / img_w, screen_h / img_h)
-        new_w = max(1, int(img_w * scale))
-        new_h = max(1, int(img_h * scale))
+        # COVER: use max so we fill the screen in both dimensions
+        scale = max(screen_w / img_w, screen_h / img_h)
+        new_w = max(1, int(round(img_w * scale)))
+        new_h = max(1, int(round(img_h * scale)))
     
         scaled = pygame.transform.smoothscale(image, (new_w, new_h))
     
-        # full-size transparent canvas
-        canvas = pygame.Surface((screen_w, screen_h))
-        canvas.fill((255, 255, 255))  # solid background so no old content shows through
-        
-        x = (screen_w - new_w) // 2
-        y = (screen_h - new_h) // 2
-        canvas.blit(scaled, (x, y))
-        return canvas
+        # Center-crop to exact screen size
+        x = (new_w - screen_w) // 2
+        y = (new_h - screen_h) // 2
+        cropped = scaled.subsurface(pygame.Rect(x, y, screen_w, screen_h)).copy()
+        return cropped
     
     def deinit(self):
         self._running = False
