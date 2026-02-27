@@ -68,6 +68,7 @@ QUIT_TIME_PERIOD = 5  # Time period in Seconds
 QUIT_DEBOUNCE_DELAY = 0.25  # Time to wait before counting next closeing
 
 # Neopixel Settings
+ENABLE_NEOPIXEL = False 
 NEOPIXEL_COUNT = 1
 NEOPIXEL_BRIGHTNESS = 0.2
 NEOPIXEL_ORDER = neopixel.GRBW
