@@ -488,7 +488,8 @@ class Book:
 
     def _load_image(self, name, filename):
         try:
-            image = pygame.image.load(IMAGES_PATH + filename)
+            image = pygame.image.load(IMAGES_PATH + filename).convert_alpha()
+            image = self._scale_and_center(image)
             self.images[name] = image
         except pygame.error:
             pass
@@ -859,7 +860,29 @@ def parse_args():
         help="Rotate everything on the display by this amount (90 = portrait)",
     )
     return parser.parse_args()
+def _scale_and_center(self, image: pygame.Surface) -> pygame.Surface:
+    """Scale image to fit inside portrait canvas without distortion and center it."""
+    if self.width <= 0 or self.height <= 0:
+        return image
 
+    img_w, img_h = image.get_size()
+    screen_w, screen_h = self.width, self.height
+
+    # Compute scale factor (preserve aspect ratio)
+    scale = min(screen_w / img_w, screen_h / img_h)
+
+    new_size = (int(img_w * scale), int(img_h * scale))
+    scaled = pygame.transform.smoothscale(image, new_size)
+
+    # Create full-size transparent canvas
+    canvas = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
+
+    # Center the image
+    x = (screen_w - new_size[0]) // 2
+    y = (screen_h - new_size[1]) // 2
+    canvas.blit(scaled, (x, y))
+
+    return canvas
 
 def main(args):
     book = Book(args.rotation)
