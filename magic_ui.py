@@ -407,7 +407,9 @@ class Book:
         scaled = pygame.transform.smoothscale(image, (new_w, new_h))
     
         # full-size transparent canvas
-        canvas = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
+        canvas = pygame.Surface((screen_w, screen_h))
+        canvas.fill((255, 255, 255))  # solid background so no old content shows through
+        
         x = (screen_w - new_w) // 2
         y = (screen_h - new_h) // 2
         canvas.blit(scaled, (x, y))
@@ -535,6 +537,7 @@ class Book:
             rect = rotated.get_rect(center=(screen_w // 2, screen_h // 2))
             self.screen.blit(rotated, rect.topleft)
         else:
+            self.screen.fill((255, 255, 255))
             target_surface.blit(buffer, (0, 0))
 
     def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
