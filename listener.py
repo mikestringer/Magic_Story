@@ -66,7 +66,7 @@ class Listener:
                     print("Listening...")
                     audio = self.recognizer.listen(
                         source,
-                        timeout=self.,
+                        timeout=self.record_timeout,
                         phrase_time_limit=None,  # stop based on pause_threshold
                     )
 
