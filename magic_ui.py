@@ -91,9 +91,9 @@ IMAGES_PATH = BASE_PATH + "images/"
 FONTS_PATH = BASE_PATH + "fonts/"
 
 # Font Path & Size
-TITLE_FONT = (None, 84)
+TITLE_FONT = (None, 64)
 TITLE_COLOR = (0, 0, 0)
-TEXT_FONT = (None, 54)
+TEXT_FONT = (None, 44)
 TEXT_COLOR = (0, 0, 0)
 
 # Delays Settings
