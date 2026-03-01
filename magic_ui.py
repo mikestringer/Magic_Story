@@ -133,8 +133,31 @@ if not os.path.isfile(PROMPT_FILE):
 
 
 def strip_fancy_quotes(text):
+    if text is None:
+        return text
+
+    # Normalize line endings
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+
+    # Replace “fancy quotes”
     text = re.sub(r"[\u2018\u2019]", "'", text)
     text = re.sub(r"[\u201C\u201D]", '"', text)
+
+    # Remove BOM / zero-width chars that often show as little boxes
+    text = text.replace("\ufeff", "")
+    text = text.replace("\u200b", "")  # zero-width space
+    text = text.replace("\u200c", "")
+    text = text.replace("\u200d", "")
+
+    # Replace non-breaking spaces with normal spaces
+    text = text.replace("\u00a0", " ")
+
+    # If you’re seeing the replacement character, drop it
+    text = text.replace("\ufffd", "")
+
+    # Clean up trailing whitespace on lines
+    text = "\n".join(line.rstrip() for line in text.split("\n"))
+
     return text
 
 
@@ -743,6 +766,11 @@ class Book:
     def load_story(self, story):
         self._busy = True
         self.pages = []
+        # --- Normalize model formatting (handles "## Title:" etc.) ---
+        story = (story or "").lstrip()
+        story = re.sub(r"^#+\s*", "", story)  # strip leading markdown heading hashes
+        story = re.sub(r"^Title\s*:\s*", "Title: ", story, flags=re.IGNORECASE)
+        
         if not story or not story.startswith("Title: "):
             print("Unexpected story format from model. Missing Title.")
             title = "A Story"
