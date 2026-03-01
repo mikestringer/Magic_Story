@@ -569,7 +569,7 @@ class Book:
             frame = pygame.transform.rotate(frame, self.rotation)
     
         # IMPORTANT: do NOT clear the screen here.
-        # The caller (display_current_page, display_message, etc.) should clear/draw background first.
+        # The caller (, display_message, etc.) should clear/draw background first.
         self.screen.blit(frame, (0, 0))
         
     def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
@@ -580,27 +580,41 @@ class Book:
     
     def display_current_page(self):
         self._busy = True
+    
+        # Clear once
+        self.screen.fill((255, 255, 255))
+    
+        # Background
         self._display_surface(self.images["background"], 0, 0)
-        pygame.display.update()
-
+        
         print(f"Loading page {self.page} of {len(self.pages)}")
         page_data = self.pages[self.page]
-
+    
+        # Draw title ONCE (no fade/word-by-word)
         if page_data["title"]:
-            self._display_title_text(page_data["title"])
-
-        self._fade_in_surface(
+            title_lines = self._wrap_text(page_data["title"], self.fonts["title"], self.textarea.width)
+            y = self.textarea.y
+            for line in title_lines:
+                line = line.strip()
+                if not line:
+                    continue
+                surf = self.fonts["title"].render(line, True, TITLE_COLOR)
+                x = self.textarea.x + (self.textarea.width - surf.get_width()) // 2
+                self.screen.blit(surf, (x, y))
+                y += self.fonts["title"].get_linesize()
+    
+        # Draw story buffer (already rendered into page_data["buffer"])
+        self.screen.blit(
             page_data["buffer"],
-            self.textarea.x,
-            self.textarea.y + page_data["text_position"],
-            TEXT_FADE_TIME,
-            TEXT_FADE_STEPS,
+            (self.textarea.x, self.textarea.y + page_data["text_position"]),
         )
-
+    
+        # Buttons
         if self.page > 0 or self.story > 0:
             self.buttons["back"].show()
         self.buttons["next"].show()
         self.buttons["new"].show()
+    
         pygame.display.update()
         self._busy = False
 
