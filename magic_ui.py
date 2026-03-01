@@ -764,7 +764,7 @@ class Book:
 
     def generate_new_story(self):
         self._busy = True
-        self.display_message("Please tell me the story you wish to read.")
+        #self.display_message("Please tell me the story you wish to read.")
     
         if self._sleep_request:
             self._busy = False
@@ -794,7 +794,7 @@ class Book:
         # Even if the callback doesn't fire quickly, show it anyway after a short timeout.
         listening_started.wait(timeout=1.0)
         if not self._sleep_request:
-            self.display_message("Listening... Speak now!")
+            self.display_message("Please tell me the story you wish to read. Listening...Speak now!")
     
         # Wait up to RECORD_TIMEOUT + a little buffer for the listener thread to finish
         deadline = time.monotonic() + (RECORD_TIMEOUT + 2)
@@ -887,7 +887,7 @@ class Book:
                     return None
         except Exception as e:
             print(f"Ollama error: {e}")
-            return "Title: Error\n\nI couldn't reach the storyteller brain. Please try again."
+            return "Title: Error\n\nI couldn't reach the storyteller's magic brain. Please try again."
 
         return strip_fancy_quotes(response)
 
