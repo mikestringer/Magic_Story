@@ -306,8 +306,14 @@ class Book:
         self.screen.fill((255, 255, 255))
 
         # This script renders "portrait" by swapping width/height and rotating surfaces
-        self.width = self.screen.get_height()
-        self.height = self.screen.get_width()
+        #self.width = self.screen.get_height()
+        #self.height = self.screen.get_width()
+        # Use the actual display size from the OS
+        screen_w, screen_h = self.screen.get_size()
+        print("SCREEN:", self.screen.get_size())
+        print("CANVAS:", self.width, self.height)
+        self.width = screen_w
+        self.height = screen_h
 
         # Preload welcome image and display it
         self._load_image("welcome", WELCOME_IMAGE)
@@ -523,20 +529,27 @@ class Book:
         self.fonts[name] = pygame.font.Font(font_path, font_size)  # font_path can be None
     
     def _display_surface(self, surface, x=0, y=0, target_surface=None):
-        buffer = self._create_transparent_buffer((self.width, self.height))
-        #buffer.blit(surface, (x, y))
-        buffer.blit(surface, (0, 0))
+        """
+        Draw `surface` at (x,y). If target_surface is provided, draw onto it.
+        Otherwise draw onto the real screen and apply rotation if needed.
+        """
+        if target_surface is not None:
+            target_surface.blit(surface, (x, y))
+            return
     
-        if target_surface is None:
-           # rotated = pygame.transform.rotate(buffer, self.rotation)
-           rotated = buffer
-           # ✅ Center the rotated surface on the physical screen
-           screen_w, screen_h = self.screen.get_size()
-           rect = rotated.get_rect(center=(screen_w // 2, screen_h // 2))
-           self.screen.blit(rotated, rect.topleft)
-        else:
-            self.screen.fill((255, 255, 255))
-            target_surface.blit(buffer, (0, 0))
+        # Draw to a full-screen frame buffer so rotation math is consistent
+        frame = self._create_transparent_buffer((self.width, self.height))
+        frame.blit(surface, (x, y))
+    
+        if self.rotation:
+            frame = pygame.transform.rotate(frame, self.rotation)
+    
+        # Always clear the physical screen each frame to avoid ghosting/artifacts
+        self.screen.fill((255, 255, 255))
+    
+        screen_w, screen_h = self.screen.get_size()
+        rect = frame.get_rect(center=(screen_w // 2, screen_h // 2))
+        self.screen.blit(frame, rect.topleft)
 
     def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
         buffer = self._create_transparent_buffer(self.screen.get_size())
