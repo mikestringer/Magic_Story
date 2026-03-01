@@ -335,6 +335,7 @@ class Book:
         # Preload welcome image and display it
         self._load_image("welcome", WELCOME_IMAGE)
         self.display_welcome()
+        time.sleep(2.0)   # or 1.5 etc.
 
         # Load the prompt file
         with open(PROMPT_FILE, "r") as f:
