@@ -555,39 +555,21 @@ class Book:
             target_surface.blit(surface, (x, y))
             return
     
-        # Draw to a full-screen frame buffer so rotation math is consistent
         frame = self._create_transparent_buffer((self.width, self.height))
         frame.blit(surface, (x, y))
     
         if self.rotation:
             frame = pygame.transform.rotate(frame, self.rotation)
     
-        # Always clear the physical screen each frame to avoid ghosting/artifacts
         self.screen.fill((255, 255, 255))
-    
-        # After rotation, frame should already be the same size as the physical screen
         self.screen.blit(frame, (0, 0))
 
-        def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
-            # Simplified: no fade animation, just draw immediately
-            self._display_surface(self.images["background"], 0, 0)
-            self._display_surface(surface, x, y)
-            pygame.display.update()
-
-        def draw_alpha(alpha):
-            buffer.blit(background, (-x, -y))
-            surface.set_alpha(alpha)
-            buffer.blit(surface, (0, 0))
-            self._display_surface(buffer, x, y)
-            pygame.display.update()
-
-        for alpha in range(0, 255, round(255 / fade_steps)):
-            draw_alpha(alpha)
-            pygame.time.wait(fade_delay)
-            if self._sleep_request:
-                draw_alpha(255)
-                return
-
+    def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
+        # Simplified: no fade animation, just draw immediately
+        self._display_surface(self.images["background"], 0, 0)
+        self._display_surface(surface, x, y)
+        pygame.display.update()
+    
     def display_current_page(self):
         self._busy = True
         self._display_surface(self.images["background"], 0, 0)
