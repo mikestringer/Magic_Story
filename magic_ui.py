@@ -568,14 +568,11 @@ class Book:
         # After rotation, frame should already be the same size as the physical screen
         self.screen.blit(frame, (0, 0))
 
-    def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
-        # Background is a full-screen buffer we can blit into
-        background = self._create_transparent_buffer((self.width, self.height))
-        self._display_surface(self.images["background"], 0, 0, background)
-    
-        # Buffer is just the size of the surface we’re fading in
-        buffer = self._create_transparent_buffer(surface.get_size())
-        fade_delay = round(fade_time / fade_steps * 1000)
+        def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
+            # Simplified: no fade animation, just draw immediately
+            self._display_surface(self.images["background"], 0, 0)
+            self._display_surface(surface, x, y)
+            pygame.display.update()
 
         def draw_alpha(alpha):
             buffer.blit(background, (-x, -y))
