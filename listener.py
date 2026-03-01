@@ -17,7 +17,7 @@ class Listener:
         self.recognizer = sr.Recognizer()
 
         # ✅ Keep your key tuning items
-        self.recognizer.pause_threshold = 1.5          # wait longer before assuming done
+        self.recognizer.pause_threshold = 2.5          # wait longer before assuming done
         self.recognizer.non_speaking_duration = 1.0    # allow short pauses
         self.recognizer.dynamic_energy_threshold = True
         self.recognizer.energy_threshold = energy_threshold
