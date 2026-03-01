@@ -794,7 +794,7 @@ class Book:
         # Even if the callback doesn't fire quickly, show it anyway after a short timeout.
         listening_started.wait(timeout=1.0)
         if not self._sleep_request:
-            self.display_message("Please tell me the story you wish to read. Listening...Speak now!")
+            self.display_message("Please tell me the story you wish to read. Listening... Please Speak now!")
     
         # Wait up to RECORD_TIMEOUT + a little buffer for the listener thread to finish
         deadline = time.monotonic() + (RECORD_TIMEOUT + 2)
