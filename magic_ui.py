@@ -879,7 +879,7 @@ def parse_args():
         choices=[90, 270],
         dest="rotation",
         action="store",
-        default=90,
+        default=0,
         help="Rotate everything on the display by this amount (90 = portrait)",
     )
     return parser.parse_args()
