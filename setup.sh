@@ -48,15 +48,8 @@ else
 fi
 
 echo "== 4) Python deps (venv) =="
-pip install --upgrade \
-  requests \
-  pygame \
-  rpi-backlight \
-  SpeechRecognition \
-  pyaudio \
-  adafruit-blinka \
-  adafruit-circuitpython-neopixel \
-  adafruit-circuitpython-led-animation
+python3 -m pip install --upgrade pip
+python3 -m pip install -r "${REPO_DIR}/requirements.txt"
 
 echo "== 5) Force USB mic as default ALSA device =="
 # Find the first USB mic card number (works well for identical hardware)
