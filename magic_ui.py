@@ -561,9 +561,10 @@ class Book:
         if self.rotation:
             frame = pygame.transform.rotate(frame, self.rotation)
     
-        self.screen.fill((255, 255, 255))
+        # IMPORTANT: do NOT clear the screen here.
+        # The caller (display_current_page, display_message, etc.) should clear/draw background first.
         self.screen.blit(frame, (0, 0))
-
+        
     def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
         # Simplified: no fade animation, just draw immediately
         self._display_surface(self.images["background"], 0, 0)
