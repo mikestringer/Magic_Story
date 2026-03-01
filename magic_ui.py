@@ -708,17 +708,31 @@ class Book:
 
     def display_message(self, message):
         self._busy = True
-        self._display_surface(self.images["background"], 0, 0)
     
-        lines = self._wrap_text(message, self.fonts["title"], self.textarea.width)
-        total_h = sum(self.fonts["title"].size(line)[1] for line in lines)
-        y = (self.height // 2) - (total_h // 2)
+        # Background
+        self.screen.fill((255, 255, 255))
+        self._display_surface(self.images["background"], 0, 0)
+        pygame.display.update()
+    
+        screen_w, screen_h = self.screen.get_size()
+        font = self.fonts["title"]
+    
+        # Wrap to screen width with margins
+        max_w = screen_w - (PAGE_SIDE_MARGIN * 2)
+        lines = self._wrap_text(message, font, max_w)
+    
+        # Compute total height
+        line_h = font.get_linesize()
+        total_h = line_h * len(lines)
+    
+        y = (screen_h - total_h) // 2
     
         for line in lines:
-            rendered = self.fonts["title"].render(line.strip(), True, TITLE_COLOR)
-            x = self.textarea.width // 2 - rendered.get_width() // 2
-            self._display_surface(rendered, x + self.textarea.x, y + self.textarea.y)
-            y += rendered.get_height()
+            line = line.strip()
+            surf = font.render(line, True, TITLE_COLOR)
+            x = (screen_w - surf.get_width()) // 2
+            self.screen.blit(surf, (x, y))
+            y += line_h
     
         pygame.display.update()
         self._busy = False
@@ -794,7 +808,7 @@ class Book:
         # Even if the callback doesn't fire quickly, show it anyway after a short timeout.
         listening_started.wait(timeout=1.0)
         if not self._sleep_request:
-            self.display_message("Please tell me the story you wish to read. Listening... Please Speak now!")
+            self.display_message("Please tell me the story you wish to read. \n\n Please Speak now!")
     
         # Wait up to RECORD_TIMEOUT + a little buffer for the listener thread to finish
         deadline = time.monotonic() + (RECORD_TIMEOUT + 2)
