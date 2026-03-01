@@ -519,18 +519,25 @@ class Book:
                     button.action()
 
     def _rotate_mouse_pos(self, point):
+        # If not rotating the rendered frame, mouse coords are already correct.
+        if not self.rotation:
+            return point
+    
         angle = 360 - self.rotation
-        y, x = point
+        x, y = point  # NOTE: pygame gives (x, y)
+    
         x -= self.width // 2
         y -= self.height // 2
+    
         x, y = (
-            x * math.sin(math.radians(angle)) + y * math.cos(math.radians(angle)),
             x * math.cos(math.radians(angle)) - y * math.sin(math.radians(angle)),
+            x * math.sin(math.radians(angle)) + y * math.cos(math.radians(angle)),
         )
+    
         x += self.width // 2
         y += self.height // 2
         return (round(x), round(y))
-
+        
     def _load_image(self, name, filename):
         try:
             image = pygame.image.load(IMAGES_PATH + filename).convert_alpha()
