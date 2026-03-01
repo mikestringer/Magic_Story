@@ -309,11 +309,28 @@ class Book:
         #self.width = self.screen.get_height()
         #self.height = self.screen.get_width()
         # Use the actual display size from the OS
+        #screen_w, screen_h = self.screen.get_size()
+        #print("SCREEN:", self.screen.get_size())
+        #print("CANVAS:", self.width, self.height)
+        #self.width = screen_w
+        #self.height = screen_h
+
+        # Use the actual display size from the OS
         screen_w, screen_h = self.screen.get_size()
-        print("SCREEN:", self.screen.get_size())
-        print("CANVAS:", self.width, self.height)
-        self.width = screen_w
-        self.height = screen_h
+        print("SCREEN:", (screen_w, screen_h))
+        
+        # IMPORTANT:
+        # If we rotate the rendered frame (90/270), the logical canvas must be swapped
+        # (this is exactly how the original project worked).
+        if self.rotation in (90, 270):
+            self.width = screen_h
+            self.height = screen_w
+        else:
+            self.width = screen_w
+            self.height = screen_h
+        
+        print("CANVAS:", (self.width, self.height), "rotation:", self.rotation)
+
 
         # Preload welcome image and display it
         self._load_image("welcome", WELCOME_IMAGE)
@@ -547,9 +564,8 @@ class Book:
         # Always clear the physical screen each frame to avoid ghosting/artifacts
         self.screen.fill((255, 255, 255))
     
-        screen_w, screen_h = self.screen.get_size()
-        rect = frame.get_rect(center=(screen_w // 2, screen_h // 2))
-        self.screen.blit(frame, rect.topleft)
+        # After rotation, frame should already be the same size as the physical screen
+        self.screen.blit(frame, (0, 0))
 
     def _fade_in_surface(self, surface, x, y, fade_time, fade_steps=50):
         buffer = self._create_transparent_buffer(self.screen.get_size())
