@@ -49,6 +49,8 @@ class Listener:
 
         def record():
             try:
+                print("DEBUG listener device_index =", self.device_index)
+                print("DEBUG mic names:", sr.Microphone.list_microphone_names())
                 mic = sr.Microphone(device_index=self.device_index)
                 with mic as source:
                     # Light ambient calibration helps in classrooms
