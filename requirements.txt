@@ -5,3 +5,4 @@ pyaudio
 adafruit-blinka
 adafruit-circuitpython-neopixel
 adafruit-circuitpython-led-animation
+rpi-backlight
