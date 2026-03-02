@@ -86,7 +86,7 @@ class Listener:
                             r = requests.post(
                                 f"{self.whisper_base_url}/transcribe",
                                 files=files,
-                                timeout=60,
+                                timeout=5,
                             )
                             r.raise_for_status()
                             data = r.json()
