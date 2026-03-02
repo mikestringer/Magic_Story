@@ -365,7 +365,9 @@ class Book:
             self._prompt = f.read()
 
         # Initialize the Listener (NOTE: see section 2 below if your listener currently requires OpenAI)
-        self.listener = Listener(ENERGY_THRESHOLD, RECORD_TIMEOUT, device_index=2)
+        #self.listener = Listener(ENERGY_THRESHOLD, RECORD_TIMEOUT, device_index=2)
+        self.listener = Listener(ENERGY_THRESHOLD, RECORD_TIMEOUT)
+
 
         # Preload remaining images
         self._load_image("background", BACKGROUND_IMAGE)
