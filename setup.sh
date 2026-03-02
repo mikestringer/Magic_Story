@@ -83,6 +83,38 @@ else
   echo "NOTE: autostart file not found at ${AUTOSTART_FILE} (may vary by OS image)."
 fi
 
+echo "== Ensuring startup.sh is ready =="
+
+STARTUP_SCRIPT="${REPO_DIR}/startup.sh"
+
+if [[ ! -f "${STARTUP_SCRIPT}" ]]; then
+  echo "ERROR: startup.sh not found in repo!"
+  exit 1
+fi
+
+chmod +x "${STARTUP_SCRIPT}"
+
+
+echo "== Creating Desktop launcher =="
+
+DESKTOP_DIR="/home/pi/Desktop"
+LAUNCHER="${DESKTOP_DIR}/Magic Storybook.desktop"
+
+mkdir -p "${DESKTOP_DIR}"
+
+cat > "${LAUNCHER}" << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Magic Storybook
+Comment=Launch the Magic Storybook app
+Exec=/home/pi/magic/Magic_Story/startup.sh
+Icon=/home/pi/magic/Magic_Story/images/welcome.png
+Terminal=false
+Categories=Education;
+EOF
+
+chmod +x "${LAUNCHER}"
+
 echo "== 7) Quick sanity checks =="
 python -c "import speech_recognition, pygame, requests; print('Python imports OK')"
 echo "Repo: ${REPO_DIR}"
