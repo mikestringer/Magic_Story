@@ -141,13 +141,13 @@ class Listener:
                             phrase_time_limit=None,
                         )
         
-            except AttributeError as e:
-                # SpeechRecognition sometimes throws this if the stream never opened cleanly
-                print("Listener mic exit bug:", e)
-                with self._lock:
-                    self._result = ""
-                return
-    
+                except AttributeError as e:
+                    # SpeechRecognition sometimes throws this if the stream never opened cleanly
+                    print("Listener mic exit bug:", e)
+                    with self._lock:
+                        self._result = ""
+                    return
+        
             if self._stop_event.is_set():
                 return
     
