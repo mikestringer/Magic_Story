@@ -606,17 +606,30 @@ class Book:
     def display_current_page(self):
         self._busy = True
     
+        # If we somehow got here with no pages, don't crash.
+        if not self.pages:
+            self._busy = False
+            return
+    
+        # Clamp page index to valid range (prevents IndexError)
+        if self.page < 0:
+            self.page = 0
+        elif self.page >= len(self.pages):
+            self.page = len(self.pages) - 1
+    
         # Clear once
         self.screen.fill((255, 255, 255))
     
-        # Background
-        self._display_surface(self.images["background"], 0, 0)
-        
+        # Background (only if loaded)
+        bg = self.images.get("background")
+        if bg is not None:
+            self._display_surface(bg, 0, 0)
+    
         print(f"Loading page {self.page} of {len(self.pages)}")
         page_data = self.pages[self.page]
     
         # Draw title ONCE (no fade/word-by-word)
-        if page_data["title"]:
+        if page_data.get("title"):
             title_lines = self._wrap_text(page_data["title"], self.fonts["title"], self.textarea.width)
             y = self.textarea.y
             for line in title_lines:
@@ -712,17 +725,27 @@ class Book:
 
     def next_page(self):
         self.page += 1
+    
         if self.page >= len(self.pages):
             if self.story < len(self.stories) - 1:
                 self.story += 1
                 self.load_story(self.stories[self.story])
                 self.page = 0
             else:
-                self.generate_new_story()
+                ok = self.generate_new_story()
+                if not ok:
+                    # Stay on the last valid page; do NOT crash
+                    self.page = max(0, len(self.pages) - 1)
+                    self.display_current_page()
+                    return
+    
         self.display_current_page()
 
     def new_story(self):
-        self.generate_new_story()
+        ok = self.generate_new_story()
+        if not ok:
+            # stay where you are; don’t crash
+            self.page = max(0, min(self.page, len(self.pages) - 1)) if self.pages else 0
         self.display_current_page()
 
     def display_loading(self):
@@ -809,14 +832,14 @@ class Book:
         self.pages.append(page)
         return page
 
-    def generate_new_story(self):
+    def generate_new_story(self) -> bool:
         self._busy = True
         #self.display_message("Please tell me the story you wish to read.")
     
         if self._sleep_request:
             self._busy = False
             time.sleep(0.2)
-            return
+            return False
     
         # Thread-safe signal from the listener thread to the UI thread
         listening_started = threading.Event()
@@ -848,26 +871,26 @@ class Book:
         while self.listener.is_listening() and time.monotonic() < deadline:
             if self._sleep_request:
                 self._busy = False
-                return
+                return False
             time.sleep(0.05)
     
         if self._sleep_request:
             self._busy = False
-            return
+            return False
     
         # If listener didn't finish in time, stop it and bail
         if self.listener.is_listening():
             self.listener.stop_listening()
             print("Listener timed out.")
             self._busy = False
-            return
+            return False
     
         # Listener finished; grab the text (may be empty)
         story_request = (self.listener.recognize() or "").strip()
         if not story_request:
             print("No response from user.")
             self._busy = False
-            return
+            return False
     
         print(f"Heard: {story_request}")
     
@@ -877,11 +900,11 @@ class Book:
         response = self._sendchat(story_prompt)
         if self._sleep_request:
             self._busy = False
-            return
+            return False
     
         if not response:
             self._busy = False
-            return
+            return False
     
         print(response)
     
@@ -891,6 +914,7 @@ class Book:
         self._busy = False
     
         self.load_story(response)
+        return True
 
     def _sleep(self):
         # still used only if you re-enable reed switch later
