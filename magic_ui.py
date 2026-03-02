@@ -298,6 +298,7 @@ class Book:
         self._busy = False
         self._loading = False
         self._closing_times = deque(maxlen=QUIT_CLOSES)
+        self._quit_taps = deque(maxlen=3)
         self.cursor = {"x": 0, "y": 0}
         self.listener = None
         self.backlight = SafeBacklight()
@@ -537,11 +538,25 @@ class Book:
         time.sleep(0.1)
 
     def _handle_mousedown_event(self, event):
-        if event.button == 1:
-            coords = self._rotate_mouse_pos(event.pos)
-            for button in self.buttons.values():
-                if button.visible and button.is_in_bounds(coords):
-                    button.action()
+        if event.button != 1:
+            return
+    
+        # --- SECRET QUIT: 3 taps in PHYSICAL top-left corner within 2 seconds ---
+        raw_x, raw_y = event.pos
+        if raw_x < 60 and raw_y < 60:
+            now = time.monotonic()
+            self._quit_taps.append(now)
+            if len(self._quit_taps) == 3 and (self._quit_taps[-1] - self._quit_taps[0]) < 2.0:
+                print("Secret quit activated.")
+                self._running = False
+                return
+    
+        # Normal button handling (uses rotated coords)
+        coords = self._rotate_mouse_pos(event.pos)
+        for button in self.buttons.values():
+            if button.visible and button.is_in_bounds(coords):
+                button.action()
+                return
 
     def _rotate_mouse_pos(self, point):
         # If not rotating the rendered frame, mouse coords are already correct.
