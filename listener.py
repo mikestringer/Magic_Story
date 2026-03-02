@@ -1,24 +1,25 @@
-import speech_recognition as sr
+import os
 import threading
 import time
+import requests
+import speech_recognition as sr
 
 
 class Listener:
     """
-    Google SpeechRecognition listener (recognize_google) with:
-      - your silence tuning preserved
-      - thread-safe single active recording
-      - safe handling of ALSA/PortAudio errors
-      - speech_waiting() returns True when the attempt is finished
-        (even if result is empty), preventing rapid re-entry crashes
+    Listener with two STT backends:
+      - STT_PROVIDER=whisper -> POST audio to WHISPER_BASE_URL /transcribe
+      - STT_PROVIDER=google  -> recognizer.recognize_google(audio)
+
+    Defaults to google if env var not set.
     """
 
     def __init__(self, energy_threshold=300, record_timeout=10, device_index=None):
         self.recognizer = sr.Recognizer()
 
-        # ✅ Keep your key tuning items
-        self.recognizer.pause_threshold = 2.0          # wait longer before assuming done
-        self.recognizer.non_speaking_duration = 1.0    # allow short pauses
+        # Keep your key tuning items
+        self.recognizer.pause_threshold = 2.5
+        self.recognizer.non_speaking_duration = 1.0
         self.recognizer.dynamic_energy_threshold = True
         self.recognizer.energy_threshold = energy_threshold
 
@@ -28,17 +29,16 @@ class Listener:
         self._result = ""
         self._listening = False
 
-        # ✅ New: concurrency + lifecycle safety
         self._lock = threading.Lock()
         self._done_event = threading.Event()
         self._stop_event = threading.Event()
         self._thread = None
 
+        # STT config via env
+        self.stt_provider = os.environ.get("STT_PROVIDER", "google").strip().lower()
+        self.whisper_base_url = os.environ.get("WHISPER_BASE_URL", "").strip().rstrip("/")
+
     def listen(self, ready_callback=None):
-        """
-        Start listening in a background thread.
-        If already listening, do nothing.
-        """
         with self._lock:
             if self._listening:
                 return
@@ -51,7 +51,7 @@ class Listener:
             try:
                 mic = sr.Microphone(device_index=self.device_index)
                 with mic as source:
-                    # Optional: quick ambient calibration helps in noisy rooms
+                    # Light ambient calibration helps in classrooms
                     try:
                         self.recognizer.adjust_for_ambient_noise(source, duration=0.4)
                     except Exception:
@@ -67,23 +67,44 @@ class Listener:
                     audio = self.recognizer.listen(
                         source,
                         timeout=self.record_timeout,
-                        phrase_time_limit=None,  # stop based on pause_threshold
+                        phrase_time_limit=None,
                     )
 
                 if self._stop_event.is_set():
                     return
 
-                try:
-                    text = self.recognizer.recognize_google(audio)
-                except Exception as e:
-                    print("Recognition error:", e)
-                    text = ""
+                text = ""
+                if self.stt_provider == "whisper":
+                    if not self.whisper_base_url:
+                        print("Listener error: STT_PROVIDER=whisper but WHISPER_BASE_URL is not set")
+                        text = ""
+                    else:
+                        try:
+                            # Convert to mono 16kHz 16-bit WAV for consistency
+                            wav_bytes = audio.get_wav_data(convert_rate=16000, convert_width=2)
+                            files = {"file": ("audio.wav", wav_bytes, "audio/wav")}
+                            r = requests.post(
+                                f"{self.whisper_base_url}/transcribe",
+                                files=files,
+                                timeout=60,
+                            )
+                            r.raise_for_status()
+                            data = r.json()
+                            text = (data.get("text") or "").strip()
+                        except Exception as e:
+                            print("Whisper STT error:", e)
+                            text = ""
+                else:
+                    try:
+                        text = self.recognizer.recognize_google(audio)
+                    except Exception as e:
+                        print("Recognition error:", e)
+                        text = ""
 
                 with self._lock:
                     self._result = text
 
             except sr.WaitTimeoutError:
-                # No speech detected within timeout
                 with self._lock:
                     self._result = ""
 
@@ -102,10 +123,7 @@ class Listener:
         self._thread.start()
 
     def speech_waiting(self):
-        """
-        True when the listening attempt has finished (result may be empty).
-        This prevents the UI from triggering multiple overlapping recordings.
-        """
+        # finished (result may be empty)
         return self._done_event.is_set()
 
     def recognize(self):
@@ -116,10 +134,6 @@ class Listener:
             return self._listening
 
     def stop_listening(self):
-        """
-        We can't reliably interrupt PyAudio mid-read, but we can signal
-        to ignore results and let the thread unwind.
-        """
         self._stop_event.set()
         t = self._thread
         if t and t.is_alive():
