@@ -22,9 +22,10 @@ fi
 echo "== 1) System packages =="
 sudo apt-get update
 sudo apt-get install -y \
-  git python3 python3-pip python3-venv \
+  curl \
+  git python3 python3-pip python3-venv python3-dev \
   alsa-utils \
-  portaudio19-dev python3-pyaudio libasound2-dev \
+  portaudio19-dev libasound2-dev \
   build-essential \
   libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-ttf-2.0-0 \
   libfreetype6 libportmidi0 libjpeg-dev libpng-dev \
@@ -44,12 +45,12 @@ echo "== 3) Clone or update repo =="
 if [[ ! -d "${REPO_DIR}/.git" ]]; then
   git clone "${REPO_URL}" "${REPO_DIR}"
 else
-  git -C "${REPO_DIR}" pull
+  git -C "${REPO_DIR}" pull --ff-only origin main
 fi
 
 echo "== 4) Python deps (venv) =="
-python3 -m pip install --upgrade pip
-python3 -m pip install -r "${REPO_DIR}/requirements.txt"
+pip install --upgrade pip setuptools wheel
+pip install -r "${REPO_DIR}/requirements.txt"
 
 echo "== 5) Force USB mic as default ALSA device =="
 # Find the first USB mic card number (works well for identical hardware)
@@ -99,6 +100,9 @@ echo "== Creating Desktop launcher =="
 
 DESKTOP_DIR="/home/pi/Desktop"
 LAUNCHER="${DESKTOP_DIR}/Magic Storybook.desktop"
+
+chown pi:pi "${LAUNCHER}" || true
+chmod 755 "${LAUNCHER}" || true
 
 mkdir -p "${DESKTOP_DIR}"
 
