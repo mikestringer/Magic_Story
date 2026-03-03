@@ -1,0 +1,21 @@
+Write a {STORY_WORD_LENGTH}-word imaginative children's story.
+
+The story request is:
+{STORY_REQUEST}
+
+Requirements:
+
+- Begin the response EXACTLY with:
+Title: <Creative Title>
+
+- The first line must start with "Title: "
+- After the title, include ONE blank line.
+- Then write the story in clear paragraphs separated by ONE blank line.
+- Do NOT include any text before the title.
+- Do NOT include commentary, explanations, or formatting outside the story.
+- Use vivid descriptions and strong imagery.
+- Keep language age-appropriate (elementary school level).
+- Include occasional dialogue to make it engaging.
+- End with a satisfying conclusion.
+- Write as if the story is being read from a magical enchanted book.
+- Make it warm, whimsical, and school-appropriate funny for a teenage audience.
