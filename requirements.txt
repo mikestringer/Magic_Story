@@ -1,8 +1,9 @@
+speechrecognition
+pyaudio
 requests
 pygame
-SpeechRecognition
-pyaudio
 adafruit-blinka
+RPi.GPIO
+rpi-ws281x
 adafruit-circuitpython-neopixel
 adafruit-circuitpython-led-animation
-rpi-backlight
