@@ -182,20 +182,20 @@ class Listener:
             with self._lock:
                 self._result = text
     
-        except sr.WaitTimeoutError:
-            with self._lock:
-                self._result = ""
-    
-        except Exception as e:
-            # ALSA/PortAudio errors shouldn't crash the whole program
-            print("Listener error:", e)
-            with self._lock:
-                self._result = ""
-    
-        finally:
-            with self._lock:
-                self._listening = False
-            self._done_event.set()
+            except sr.WaitTimeoutError:
+                with self._lock:
+                    self._result = ""
+        
+            except Exception as e:
+                # ALSA/PortAudio errors shouldn't crash the whole program
+                print("Listener error:", e)
+                with self._lock:
+                    self._result = ""
+        
+            finally:
+                with self._lock:
+                    self._listening = False
+                self._done_event.set()
                 
     def speech_waiting(self):
         # finished (result may be empty)
