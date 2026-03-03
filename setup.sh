@@ -24,7 +24,7 @@ sudo apt-get update
 sudo apt-get install -y \
   curl \
   git python3 python3-pip python3-venv python3-dev \
-  alsa-utils \
+  alsa-utils flac \
   portaudio19-dev libasound2-dev \
   build-essential \
   libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-ttf-2.0-0 \
