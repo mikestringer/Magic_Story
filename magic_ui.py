@@ -60,7 +60,7 @@ ENABLE_REED_SWITCH = False
 REED_SWITCH_PIN = board.D17
 
 NEOPIXEL_PIN = board.D18
-PROMPT_FILE = "/boot/bookprompt.txt"
+PROMPT_FILE = os.path.join(BASE_PATH, "prompt.txt")
 
 # Quit Settings (Close book QUIT_CLOSES within QUIT_TIME_PERIOD to quit)
 QUIT_CLOSES = 3
