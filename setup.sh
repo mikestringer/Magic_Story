@@ -3,6 +3,7 @@
 #curl -fsSL "https://raw.githubusercontent.com/mikestringer/Magic_Story/main/setup.sh?$(date +%s)" -o setup.sh
 #chmod +x setup.sh
 #./setup.sh
+#in case a pi won't connect becasue of changes ssh-keygen -R 10.114.110.157
 
 #!/usr/bin/env bash
 set -euo pipefail
