@@ -37,7 +37,7 @@ class Listener:
         self.stt_provider = os.environ.get("STT_PROVIDER", "google").strip().lower()
         self.whisper_base_url = os.environ.get("WHISPER_BASE_URL", "").strip().rstrip("/")
 
-    def listen(self, ready_callback=None):
+    def listen(self, ready_callback=None, transcribing_callback=None):
         with self._lock:
             if self._listening:
                 return
@@ -119,6 +119,9 @@ class Listener:
 
                 text = ""
 
+                if transcribing_callback:
+                    transcribing_callback()
+
                 if self.stt_provider == "whisper":
                     if not self.whisper_base_url:
                         print("WHISPER_BASE_URL not set")
@@ -136,6 +139,12 @@ class Listener:
                             text = (data.get("text") or "").strip()
                         except Exception as e:
                             print("Whisper STT error:", e)
+
+                else:
+                    try:
+                        text = self.recognizer.recognize_google(audio)
+                    except Exception as e:
+                        print("Recognition error:", e)
 
                 else:
                     try:
