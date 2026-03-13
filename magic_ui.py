@@ -901,23 +901,23 @@ class Book:
             return False
     
         # Listener finished; grab the text (may be empty)
-        if not self._sleep_request:
-            self.display_message("Waiting for whispers...")
+        #if not self._sleep_request:
+        #    self.display_message("Waiting for whispers...")
 
-        story_request = (self.listener.recognize() or "").strip()
-        if not story_request:
-            print("No response from user.")
-            if not self._sleep_request:
-                self.display_message("Try your story again")
-                time.sleep(1.5)
-            self._busy = False
-            return False
-        # Listener finished; grab the text (may be empty)
         #story_request = (self.listener.recognize() or "").strip()
         #if not story_request:
         #    print("No response from user.")
-        #    self._busy = False
+        #    if not self._sleep_request:
+        #        self.display_message("Try your story again")
+        #       time.sleep(1.5)
+        #     self._busy = False
         #    return False
+        # Listener finished; grab the text (may be empty)
+        story_request = (self.listener.recognize() or "").strip()
+        if not story_request:
+            print("No response from user.")
+            self._busy = False
+            return False
     
         print(f"Heard: {story_request}")
     
