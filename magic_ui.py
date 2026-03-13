@@ -871,9 +871,13 @@ class Book:
                     self.pixels.show()
                 except Exception:
                     pass
+        def show_transcribing():
+            # IMPORTANT: This callback runs in the listener thread.
+            # Do NOT call pygame / display functions here.
+            transcribing_started.set()
     
         # Start listening
-        self.listener.listen(ready_callback=show_listening)
+        self.listener.listen(ready_callback=show_listening, transcribing_callback=show_transcribing)
     
         # Show a clear on-screen cue from the MAIN thread as soon as we know listening started.
         # Even if the callback doesn't fire quickly, show it anyway after a short timeout.
@@ -883,10 +887,14 @@ class Book:
     
         # Wait up to RECORD_TIMEOUT + a little buffer for the listener thread to finish
         deadline = time.monotonic() + (RECORD_TIMEOUT + 2)
+        showing_transcribing = False
         while self.listener.is_listening() and time.monotonic() < deadline:
             if self._sleep_request:
                 self._busy = False
                 return False
+            if transcribing_started.is_set() and not showing_transcribing:
+                self.display_message("Waiting for whispers...")
+                showing_transcribing = True
             time.sleep(0.05)
     
         if self._sleep_request:
