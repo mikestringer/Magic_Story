@@ -858,6 +858,7 @@ class Book:
     
         # Thread-safe signal from the listener thread to the UI thread
         listening_started = threading.Event()
+        transcribing_started = threading.Event()
     
         def show_listening():
             # IMPORTANT: This callback runs in the listener thread.
