@@ -71,9 +71,10 @@ class Listener:
                 names = sr.Microphone.list_microphone_names()
                 print("DEBUG mic names:", names)
 
-                idx = self.device_index
-                if idx is None:
-                    idx = pick_usb_index()
+                #idx = self.device_index
+                #if idx is None:
+                #    idx = pick_usb_index()
+                idx = self.device_index or pick_usb_index()
 
                 if idx is None or not mic_has_input_channels(idx):
                     print("Mic not ready. Retrying...")
