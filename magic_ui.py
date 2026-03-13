@@ -925,6 +925,7 @@ class Book:
         story_request = (self.listener.recognize() or "").strip()
         if not story_request:
             print("No response from user.")
+            time.sleep(0.5)
             self._busy = False
             return False
     
@@ -1026,9 +1027,15 @@ def main(args):
     book = Book(args.rotation)
     try:
         book.start()
-        while len(book.pages) == 0:
+        #while len(book.pages) == 0:
+            #if not book.sleeping:
+                #book.generate_new_story()
+        while len(book.pages) == 0 and book.running:
             if not book.sleeping:
-                book.generate_new_story()
+                ok = book.generate_new_story()
+                if not ok:
+                    time.sleep(1.0)
+            book.handle_events()
         book.display_current_page()
 
         while book.running:
