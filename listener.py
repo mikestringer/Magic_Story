@@ -74,11 +74,12 @@ class Listener:
                 #idx = self.device_index
                 #if idx is None:
                 #    idx = pick_usb_index()
-                idx = self.device_index or pick_usb_index()
+                idx = self.device_index
+                if idx is None:
+                    idx = 2
 
-                if idx is None or not mic_has_input_channels(idx):
-                    print("Mic not ready. Retrying...")
-                    time.sleep(0.35)
+                if not mic_has_input_channels(idx):
+                    print(f"Preferred mic index {idx} not usable, trying auto-detect...")
                     idx = pick_usb_index()
 
                 if idx is None:
