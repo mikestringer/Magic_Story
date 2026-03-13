@@ -858,7 +858,7 @@ class Book:
     
         # Thread-safe signal from the listener thread to the UI thread
         listening_started = threading.Event()
-        transcribing_started = threading.Event()
+        #transcribing_started = threading.Event()
     
         def show_listening():
             # IMPORTANT: This callback runs in the listener thread.
@@ -872,14 +872,14 @@ class Book:
                     self.pixels.show()
                 except Exception:
                     pass
-        def show_transcribing():
-            # IMPORTANT: This callback runs in the listener thread.
-            # Do NOT call pygame / display functions here.
-            transcribing_started.set()
+        #def show_transcribing():
+        #    # IMPORTANT: This callback runs in the listener thread.
+        #    # Do NOT call pygame / display functions here.
+        #    transcribing_started.set()
     
         # Start listening
-        self.listener.listen(ready_callback=show_listening, transcribing_callback=show_transcribing)
-    
+        self.listener.listen(ready_callback=show_listening)  
+
         # Show a clear on-screen cue from the MAIN thread as soon as we know listening started.
         # Even if the callback doesn't fire quickly, show it anyway after a short timeout.
         listening_started.wait(timeout=1.0)
@@ -893,9 +893,9 @@ class Book:
             if self._sleep_request:
                 self._busy = False
                 return False
-            if transcribing_started.is_set() and not showing_transcribing:
-                self.display_message("Waiting for whispers...")
-                showing_transcribing = True
+            #if transcribing_started.is_set() and not showing_transcribing:
+                #self.display_message("Waiting for whispers...")
+                #showing_transcribing = True
             time.sleep(0.05)
     
         if self._sleep_request:
