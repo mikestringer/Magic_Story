@@ -146,12 +146,6 @@ class Listener:
                     except Exception as e:
                         print("Recognition error:", e)
 
-                else:
-                    try:
-                        text = self.recognizer.recognize_google(audio)
-                    except Exception as e:
-                        print("Recognition error:", e)
-
                 with self._lock:
                     self._result = text
 
