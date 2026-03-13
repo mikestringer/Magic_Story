@@ -123,8 +123,8 @@ OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://10.110.5.182:11434")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "").strip()
 
 # Speech Recognition Parameters (used by your Listener)
-ENERGY_THRESHOLD = 300
-RECORD_TIMEOUT = 30
+ENERGY_THRESHOLD = 400
+RECORD_TIMEOUT = 10
 
 # Check that the prompt file exists and load it
 if not os.path.isfile(PROMPT_FILE):
@@ -901,11 +901,23 @@ class Book:
             return False
     
         # Listener finished; grab the text (may be empty)
+        if not self._sleep_request:
+            self.display_message("Waiting for whispers...")
+
         story_request = (self.listener.recognize() or "").strip()
         if not story_request:
             print("No response from user.")
+            if not self._sleep_request:
+                self.display_message("Try your story again")
+                time.sleep(1.5)
             self._busy = False
             return False
+        # Listener finished; grab the text (may be empty)
+        #story_request = (self.listener.recognize() or "").strip()
+        #if not story_request:
+        #    print("No response from user.")
+        #    self._busy = False
+        #    return False
     
         print(f"Heard: {story_request}")
     
