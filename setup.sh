@@ -4,6 +4,18 @@
 #chmod +x setup.sh
 #./setup.sh
 #in case a pi won't connect becasue of changes ssh-keygen -R 10.114.110.157
+#test the whisper and Ollama servers from a computer
+#echo "WHISPER:" && curl -s http://10.110.5.182:9000/ && echo && echo "OLLAMA:" && curl -s http://10.110.5.182:11434/api/tags
+#start teh whisper server
+#cd ~/whisper_server
+#source whispvenv/bin/activate
+#uvicorn server:app --host 0.0.0.0 --port 9000
+#Keep the Ollama server model loaded
+#curl http://localhost:11434/api/generate -d '{
+#3 "model": "llama3.1:8b",
+#"prompt": "",
+#"keep_alive": -1
+#}'
 
 #!/usr/bin/env bash
 set -euo pipefail
