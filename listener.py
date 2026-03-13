@@ -37,7 +37,7 @@ class Listener:
         self.stt_provider = os.environ.get("STT_PROVIDER", "google").strip().lower()
         self.whisper_base_url = os.environ.get("WHISPER_BASE_URL", "").strip().rstrip("/")
 
-    def listen(self, ready_callback=None, transcribing_callback=None):
+    def listen(self, ready_callback=None):
         with self._lock:
             if self._listening:
                 return
@@ -71,15 +71,8 @@ class Listener:
                 names = sr.Microphone.list_microphone_names()
                 print("DEBUG mic names:", names)
 
-                #idx = self.device_index
-                #if idx is None:
-                #    idx = pick_usb_index()
                 idx = self.device_index
                 if idx is None:
-                    idx = 2
-
-                if not mic_has_input_channels(idx):
-                    print(f"Preferred mic index {idx} not usable, trying auto-detect...")
                     idx = pick_usb_index()
 
                 if idx is None:
@@ -120,9 +113,6 @@ class Listener:
                     return
 
                 text = ""
-
-                if transcribing_callback:
-                    transcribing_callback()
 
                 if self.stt_provider == "whisper":
                     if not self.whisper_base_url:
