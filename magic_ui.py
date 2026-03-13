@@ -124,7 +124,7 @@ OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "").strip()
 
 # Speech Recognition Parameters (used by your Listener)
 ENERGY_THRESHOLD = 400
-RECORD_TIMEOUT = 10
+RECORD_TIMEOUT = 7
 
 # Check that the prompt file exists and load it
 if not os.path.isfile(PROMPT_FILE):
