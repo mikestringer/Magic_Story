@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Melissa LeBlanc-Williams for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT
+#this is the classroom scalable version based off of the original Magic Storybook project by Melissa LeBlanc-Williams. It has been modified to work with Ollama and to remove the dependency on OpenAI's API, making it more suitable for classroom use without needing API keys or internet access.
 
 import threading
 import sys
