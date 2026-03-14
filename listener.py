@@ -15,7 +15,7 @@ class Listener:
     Defaults to google if env var not set.
     """
 
-    def __init__(self, energy_threshold=400, record_timeout=10, device_index=2):
+    def __init__(self, energy_threshold=400, record_timeout=10, device_index=None ):
         self.recognizer = sr.Recognizer()
 
         self.recognizer.pause_threshold = 2.5
