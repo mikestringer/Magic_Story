@@ -858,7 +858,6 @@ class Book:
     
         # Thread-safe signal from the listener thread to the UI thread
         listening_started = threading.Event()
-        #transcribing_started = threading.Event()
     
         def show_listening():
             # IMPORTANT: This callback runs in the listener thread.
@@ -872,14 +871,10 @@ class Book:
                     self.pixels.show()
                 except Exception:
                     pass
-        #def show_transcribing():
-        #    # IMPORTANT: This callback runs in the listener thread.
-        #    # Do NOT call pygame / display functions here.
-        #    transcribing_started.set()
     
         # Start listening
-        self.listener.listen(ready_callback=show_listening)  
-
+        self.listener.listen(ready_callback=show_listening)
+    
         # Show a clear on-screen cue from the MAIN thread as soon as we know listening started.
         # Even if the callback doesn't fire quickly, show it anyway after a short timeout.
         listening_started.wait(timeout=1.0)
@@ -888,14 +883,10 @@ class Book:
     
         # Wait up to RECORD_TIMEOUT + a little buffer for the listener thread to finish
         deadline = time.monotonic() + (RECORD_TIMEOUT + 2)
-        showing_transcribing = False
         while self.listener.is_listening() and time.monotonic() < deadline:
             if self._sleep_request:
                 self._busy = False
                 return False
-            #if transcribing_started.is_set() and not showing_transcribing:
-                #self.display_message("Waiting for whispers...")
-                #showing_transcribing = True
             time.sleep(0.05)
     
         if self._sleep_request:
@@ -910,22 +901,9 @@ class Book:
             return False
     
         # Listener finished; grab the text (may be empty)
-        #if not self._sleep_request:
-        #    self.display_message("Waiting for whispers...")
-
-        #story_request = (self.listener.recognize() or "").strip()
-        #if not story_request:
-        #    print("No response from user.")
-        #    if not self._sleep_request:
-        #        self.display_message("Try your story again")
-        #       time.sleep(1.5)
-        #     self._busy = False
-        #    return False
-        # Listener finished; grab the text (may be empty)
         story_request = (self.listener.recognize() or "").strip()
         if not story_request:
             print("No response from user.")
-            time.sleep(0.5)
             self._busy = False
             return False
     
@@ -1027,15 +1005,9 @@ def main(args):
     book = Book(args.rotation)
     try:
         book.start()
-        #while len(book.pages) == 0:
-            #if not book.sleeping:
-                #book.generate_new_story()
-        while len(book.pages) == 0 and book.running:
+        while len(book.pages) == 0:
             if not book.sleeping:
-                ok = book.generate_new_story()
-                if not ok:
-                    time.sleep(1.0)
-            book.handle_events()
+                book.generate_new_story()
         book.display_current_page()
 
         while book.running:
