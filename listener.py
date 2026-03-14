@@ -15,7 +15,7 @@ class Listener:
     Defaults to google if env var not set.
     """
 
-    def __init__(self, energy_threshold=300, record_timeout=10, device_index=None):
+    def __init__(self, energy_threshold=400, record_timeout=10, device_index=2):
         self.recognizer = sr.Recognizer()
 
         self.recognizer.pause_threshold = 2.5
@@ -73,6 +73,11 @@ class Listener:
 
                 idx = self.device_index
                 if idx is None:
+                    idx = pick_usb_index()
+
+                if idx is None or not mic_has_input_channels(idx):
+                    print("Mic not ready. Retrying...")
+                    time.sleep(0.35)
                     idx = pick_usb_index()
 
                 if idx is None:
