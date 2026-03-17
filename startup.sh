@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+#Then it’s a PCManFM setting, not your file.
+#Open File Manager → go to:
+#Edit → Preferences → General
+#Set:
+# “Don’t ask options on launch executable file”
 set -euo pipefail
 
 # --- Paths ---
@@ -7,8 +12,9 @@ REPO_DIR="${BASE_DIR}/Magic_Story"
 VENV_DIR="${BASE_DIR}/venv"
 
 # --- Config (edit these once and forget) ---
-# Choose STT provider: "google" or "whisper"
-#: "${STT_PROVIDER:=google}"
+# Choose STT provider: "google" or "whisper" if google is commented out it's only using the specified whisper server
+#Note that this google version struggles with a full classroom trying to use it
+#: "${STT_PROVIDER:=google}" 
 : "${STT_PROVIDER:=whisper}"
 
 # Whisper server URL (only used if STT_PROVIDER=whisper)
