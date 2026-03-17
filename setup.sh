@@ -65,26 +65,20 @@ echo "== 4) Python deps (venv) =="
 pip install --upgrade pip setuptools wheel
 pip install -r "${REPO_DIR}/requirements.txt"
 
-echo "== 5) Force USB mic as default ALSA device =="
-# Find the first USB mic card number (works well for identical hardware)
-USB_CARD_NUM="$(arecord -l 2>/dev/null | awk '/USB/ {gsub("card ",""); print $2; exit}' | tr -d ':')"
-
-if [[ -n "${USB_CARD_NUM}" ]]; then
-  echo "Found USB mic at ALSA card ${USB_CARD_NUM}"
-  cat > /tmp/asound.conf <<EOF
+echo "== 5) Configure ALSA (USB mic input, Pi audio output) =="
+cat > /tmp/asound.conf <<EOF
 pcm.!default {
-  type plug
-  slave.pcm "hw:${USB_CARD_NUM},0"
+    type asym
+    playback.pcm "hw:2,0"
+    capture.pcm "hw:3,0"
 }
+
 ctl.!default {
-  type hw
-  card ${USB_CARD_NUM}
+    type hw
+    card 3
 }
 EOF
-  sudo mv /tmp/asound.conf /etc/asound.conf
-else
-  echo "WARNING: Could not auto-detect USB mic via arecord -l. Leaving ALSA defaults unchanged."
-fi
+sudo mv /tmp/asound.conf /etc/asound.conf
 
 echo "== 6) Disable screen blanking (LXDE session autostart) =="
 AUTOSTART_FILE="/etc/xdg/lxsession/LXDE-pi/autostart"

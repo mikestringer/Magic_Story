@@ -15,7 +15,7 @@ class Listener:
     Defaults to google if env var not set.
     """
 
-    def __init__(self, energy_threshold=400, record_timeout=10, device_index=None ):
+    def __init__(self, energy_threshold=900, record_timeout=10, device_index=None ):
         self.recognizer = sr.Recognizer()
 
         self.recognizer.pause_threshold = 2.5
@@ -28,6 +28,7 @@ class Listener:
 
         self._result = ""
         self._listening = False
+        self._timed_out = False
 
         self._lock = threading.Lock()
         self._done_event = threading.Event()
@@ -43,6 +44,7 @@ class Listener:
                 return
             self._listening = True
             self._result = ""
+            self._timed_out = False
             self._done_event.clear()
             self._stop_event.clear()
 
@@ -149,6 +151,7 @@ class Listener:
             except sr.WaitTimeoutError:
                 with self._lock:
                     self._result = ""
+                    self._timed_out = True
 
             except Exception as e:
                 print("Listener error:", e)
@@ -181,3 +184,7 @@ class Listener:
         with self._lock:
             self._listening = False
         self._done_event.set()
+
+    def timed_out(self):
+        with self._lock:
+            return self._timed_out  

@@ -882,22 +882,26 @@ class Book:
         if not self._sleep_request:
             self.display_message("Please tell me the story you wish to read. \n\n Please Speak now!")
     
-        # Wait up to RECORD_TIMEOUT + a little buffer for the listener thread to finish
-        deadline = time.monotonic() + (RECORD_TIMEOUT + 2)
-        while self.listener.is_listening() and time.monotonic() < deadline:
+        # Wait for the listener thread to finish on its own
+        while not self.listener.speech_waiting():
             if self._sleep_request:
                 self._busy = False
                 return False
             time.sleep(0.05)
-    
+
         if self._sleep_request:
             self._busy = False
             return False
-    
-        # If listener didn't finish in time, stop it and bail
-        if self.listener.is_listening():
-            self.listener.stop_listening()
+
+        if self.listener.timed_out():
             print("Listener timed out.")
+            self._busy = False
+            return False
+
+        # Listener finished; grab the text (may be empty)
+        story_request = (self.listener.recognize() or "").strip()
+        if not story_request:
+            print("No response from user.")
             self._busy = False
             return False
     
