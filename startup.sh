@@ -8,11 +8,12 @@ VENV_DIR="${BASE_DIR}/venv"
 
 # --- Config (edit these once and forget) ---
 # Choose STT provider: "google" or "whisper"
-: "${STT_PROVIDER:=google}"
+#: "${STT_PROVIDER:=google}"
+: "${STT_PROVIDER:=whisper}"
 
 # Whisper server URL (only used if STT_PROVIDER=whisper)
-: "${WHISPER_BASE_URL:=http://10.110.5.182:9000}"
-
+#: "${WHISPER_BASE_URL:=http://10.110.5.182:9000}"
+: "${WHISPER_BASE_URL:=http://10.110.65.183:9000}"
 # Optional Ollama override (if you want to change later)
 # : "${OLLAMA_BASE_URL:=http://10.110.5.182:11434}"
 
